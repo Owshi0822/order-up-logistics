@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -60,15 +59,25 @@ const DeliveryCoordinator = () => {
     }
   ]);
 
-  const [newDelivery, setNewDelivery] = useState({
+  const [newDelivery, setNewDelivery] = useState<{
+    poId: string;
+    supplierName: string;
+    deliveryType: 'office' | 'site' | 'direct-to-site';
+    scheduledDate: string;
+    address: string;
+    contactPerson: string;
+    contactNumber: string;
+    deliveryMethod: 'supplier' | 'lalamove' | 'company-vehicle';
+    notes: string;
+  }>({
     poId: '',
     supplierName: '',
-    deliveryType: 'office' as const,
+    deliveryType: 'office',
     scheduledDate: '',
     address: '',
     contactPerson: '',
     contactNumber: '',
-    deliveryMethod: 'supplier' as const,
+    deliveryMethod: 'supplier',
     notes: ''
   });
 

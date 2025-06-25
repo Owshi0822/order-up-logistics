@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,11 +51,17 @@ const PurchaseOrderManager = () => {
     }
   ]);
 
-  const [newPO, setNewPO] = useState({
+  const [newPO, setNewPO] = useState<{
+    quotationId: string;
+    supplierName: string;
+    totalAmount: number;
+    paymentTerms: 'PDC' | 'Fund Transfer' | 'Terms';
+    expectedDelivery: string;
+  }>({
     quotationId: '',
     supplierName: '',
     totalAmount: 0,
-    paymentTerms: 'PDC' as const,
+    paymentTerms: 'PDC',
     expectedDelivery: ''
   });
 
