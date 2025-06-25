@@ -1,18 +1,22 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, FileText, ShoppingCart, Truck, Mail, Calendar, DollarSign, User, AlertCircle, Search, Menu } from "lucide-react";
+import { Plus, FileText, ShoppingCart, Truck, Mail, Calendar, DollarSign, User, AlertCircle, Search, Menu, Package, Building2, Eye, Github } from "lucide-react";
 import MRFForm from "@/components/MRFForm";
 import QuotationManager from "@/components/QuotationManager";
 import PurchaseOrderManager from "@/components/PurchaseOrderManager";
 import DeliveryCoordinator from "@/components/DeliveryCoordinator";
+import SupplierSourcing from "@/components/SupplierSourcing";
+import EmailTemplates from "@/components/EmailTemplates";
+import InventoryManager from "@/components/InventoryManager";
+import EnterpriseIntegration from "@/components/EnterpriseIntegration";
+import GuestPortfolio from "@/components/GuestPortfolio";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import SupplierSourcing from "@/components/SupplierSourcing";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface ProcessItem {
   id: string;
@@ -30,6 +34,7 @@ const Index = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isGuestMode, setIsGuestMode] = useState(false);
   const [processes] = useState<ProcessItem[]>([
     {
       id: "MRF-001",
@@ -64,6 +69,24 @@ const Index = () => {
       assignee: "Procurement Team"
     }
   ]);
+
+  // If in guest mode, show portfolio
+  if (isGuestMode) {
+    return (
+      <div className="relative">
+        <div className="absolute top-4 right-4 z-50">
+          <Button 
+            onClick={() => setIsGuestMode(false)}
+            variant="outline"
+            className="bg-white/90 backdrop-blur-sm"
+          >
+            Back to App
+          </Button>
+        </div>
+        <GuestPortfolio />
+      </div>
+    );
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -104,13 +127,15 @@ const Index = () => {
   };
 
   const TabsNavigation = () => (
-    <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-1">
+    <TabsList className="grid w-full grid-cols-3 lg:grid-cols-8 gap-1">
       <TabsTrigger value="dashboard" className="text-xs sm:text-sm">Dashboard</TabsTrigger>
       <TabsTrigger value="mrf" className="text-xs sm:text-sm">MRF</TabsTrigger>
       <TabsTrigger value="quotations" className="text-xs sm:text-sm">Quotes</TabsTrigger>
       <TabsTrigger value="purchase-orders" className="text-xs sm:text-sm">PO</TabsTrigger>
       <TabsTrigger value="suppliers" className="text-xs sm:text-sm">Suppliers</TabsTrigger>
-      <TabsTrigger value="delivery" className="text-xs sm:text-sm">Delivery</TabsTrigger>
+      <TabsTrigger value="inventory" className="text-xs sm:text-sm">Inventory</TabsTrigger>
+      <TabsTrigger value="email" className="text-xs sm:text-sm">Email</TabsTrigger>
+      <TabsTrigger value="enterprise" className="text-xs sm:text-sm">ERP</TabsTrigger>
     </TabsList>
   );
 
@@ -132,6 +157,14 @@ const Index = () => {
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center space-x-3">
               <ThemeToggle />
+              <Button variant="outline" size="sm" onClick={() => setIsGuestMode(true)}>
+                <Eye className="h-4 w-4 mr-2" />
+                Portfolio View
+              </Button>
+              <Button variant="outline" size="sm">
+                <Github className="h-4 w-4 mr-2" />
+                GitHub
+              </Button>
               <Button variant="outline" size="sm">
                 <Mail className="h-4 w-4 mr-2" />
                 Email Center
@@ -153,6 +186,14 @@ const Index = () => {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                   <div className="space-y-4 py-4">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setIsGuestMode(true)}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Portfolio View
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Github className="h-4 w-4 mr-2" />
+                      GitHub Repository
+                    </Button>
                     <Button variant="outline" className="w-full justify-start">
                       <Mail className="h-4 w-4 mr-2" />
                       Email Center
@@ -331,7 +372,11 @@ const Index = () => {
                     <Search className="h-3 w-3 lg:h-4 lg:w-4" />
                     <span>Suppliers</span>
                   </Button>
-                  <Button variant="outline" className="flex items-center justify-center space-x-1 lg:space-x-2 text-xs lg:text-sm col-span-2 sm:col-span-1">
+                  <Button variant="outline" onClick={() => setActiveTab("inventory")} className="flex items-center justify-center space-x-1 lg:space-x-2 text-xs lg:text-sm">
+                    <Package className="h-3 w-3 lg:h-4 lg:w-4" />
+                    <span>Inventory</span>
+                  </Button>
+                  <Button variant="outline" onClick={() => setActiveTab("email")} className="flex items-center justify-center space-x-1 lg:space-x-2 text-xs lg:text-sm">
                     <Mail className="h-3 w-3 lg:h-4 lg:w-4" />
                     <span>Email</span>
                   </Button>
@@ -356,8 +401,16 @@ const Index = () => {
             <SupplierSourcing />
           </TabsContent>
 
-          <TabsContent value="delivery">
-            <DeliveryCoordinator />
+          <TabsContent value="inventory">
+            <InventoryManager />
+          </TabsContent>
+
+          <TabsContent value="email">
+            <EmailTemplates />
+          </TabsContent>
+
+          <TabsContent value="enterprise">
+            <EnterpriseIntegration />
           </TabsContent>
         </Tabs>
       </div>
