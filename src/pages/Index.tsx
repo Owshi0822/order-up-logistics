@@ -1,9 +1,10 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, FileText, ShoppingCart, Truck, Mail, Calendar, DollarSign, User, AlertCircle, Search } from "lucide-react";
+import { Plus, FileText, ShoppingCart, Truck, Mail, Calendar, DollarSign, User, AlertCircle, Search, Menu } from "lucide-react";
 import MRFForm from "@/components/MRFForm";
 import QuotationManager from "@/components/QuotationManager";
 import PurchaseOrderManager from "@/components/PurchaseOrderManager";
@@ -11,6 +12,7 @@ import DeliveryCoordinator from "@/components/DeliveryCoordinator";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import SupplierSourcing from "@/components/SupplierSourcing";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 interface ProcessItem {
   id: string;
@@ -27,6 +29,7 @@ interface ProcessItem {
 const Index = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [processes] = useState<ProcessItem[]>([
     {
       id: "MRF-001",
@@ -64,12 +67,12 @@ const Index = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      case 'in-progress': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'approved': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'in-progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'completed': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
     }
   };
 
@@ -100,17 +103,34 @@ const Index = () => {
     totalValue: processes.reduce((sum, p) => sum + (p.amount || 0), 0)
   };
 
+  const TabsNavigation = () => (
+    <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-1">
+      <TabsTrigger value="dashboard" className="text-xs sm:text-sm">Dashboard</TabsTrigger>
+      <TabsTrigger value="mrf" className="text-xs sm:text-sm">MRF</TabsTrigger>
+      <TabsTrigger value="quotations" className="text-xs sm:text-sm">Quotes</TabsTrigger>
+      <TabsTrigger value="purchase-orders" className="text-xs sm:text-sm">PO</TabsTrigger>
+      <TabsTrigger value="suppliers" className="text-xs sm:text-sm">Suppliers</TabsTrigger>
+      <TabsTrigger value="delivery" className="text-xs sm:text-sm">Delivery</TabsTrigger>
+    </TabsList>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
+      {/* Mobile-First Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Procurement Management System</h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">Internal logistics and purchasing platform</p>
+          <div className="flex justify-between items-center py-4 lg:py-6">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white truncate">
+                Procurement System
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mt-1 hidden sm:block">
+                Internal logistics and purchasing platform
+              </p>
             </div>
-            <div className="flex items-center space-x-3">
+            
+            {/* Desktop Actions */}
+            <div className="hidden lg:flex items-center space-x-3">
               <ThemeToggle />
               <Button variant="outline" size="sm">
                 <Mail className="h-4 w-4 mr-2" />
@@ -121,179 +141,199 @@ const Index = () => {
                 Procurement Officer
               </Badge>
             </div>
+
+            {/* Mobile Actions */}
+            <div className="flex lg:hidden items-center space-x-2">
+              <ThemeToggle />
+              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                  <div className="space-y-4 py-4">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Mail className="h-4 w-4 mr-2" />
+                      Email Center
+                    </Button>
+                    <Badge variant="secondary" className="w-full justify-center px-3 py-2">
+                      <User className="h-3 w-3 mr-1" />
+                      Procurement Officer
+                    </Badge>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="mrf">Material Request</TabsTrigger>
-            <TabsTrigger value="quotations">Quotations</TabsTrigger>
-            <TabsTrigger value="purchase-orders">Purchase Orders</TabsTrigger>
-            <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
-            <TabsTrigger value="delivery">Delivery</TabsTrigger>
-          </TabsList>
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 lg:py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 lg:space-y-6">
+          <div className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900 pb-2">
+            <TabsNavigation />
+          </div>
 
-          <TabsContent value="dashboard" className="space-y-6">
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
-                  <AlertCircle className="h-4 w-4 text-yellow-600" />
+          <TabsContent value="dashboard" className="space-y-4 lg:space-y-6 mt-0">
+            {/* Mobile-Optimized Stats Overview */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+              <Card className="min-w-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 lg:px-6">
+                  <CardTitle className="text-xs lg:text-sm font-medium truncate">Pending</CardTitle>
+                  <AlertCircle className="h-3 w-3 lg:h-4 lg:w-4 text-yellow-600 flex-shrink-0" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600">{stats.pendingApprovals}</div>
-                  <p className="text-xs text-muted-foreground">Require immediate attention</p>
+                <CardContent className="px-3 lg:px-6">
+                  <div className="text-lg lg:text-2xl font-bold text-yellow-600">{stats.pendingApprovals}</div>
+                  <p className="text-xs text-muted-foreground hidden sm:block">Require attention</p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Active Orders</CardTitle>
-                  <ShoppingCart className="h-4 w-4 text-blue-600" />
+              <Card className="min-w-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 lg:px-6">
+                  <CardTitle className="text-xs lg:text-sm font-medium truncate">Active</CardTitle>
+                  <ShoppingCart className="h-3 w-3 lg:h-4 lg:w-4 text-blue-600 flex-shrink-0" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{stats.activeOrders}</div>
-                  <p className="text-xs text-muted-foreground">Currently in progress</p>
+                <CardContent className="px-3 lg:px-6">
+                  <div className="text-lg lg:text-2xl font-bold text-blue-600">{stats.activeOrders}</div>
+                  <p className="text-xs text-muted-foreground hidden sm:block">In progress</p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Completed Today</CardTitle>
-                  <Calendar className="h-4 w-4 text-green-600" />
+              <Card className="min-w-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 lg:px-6">
+                  <CardTitle className="text-xs lg:text-sm font-medium truncate">Today</CardTitle>
+                  <Calendar className="h-3 w-3 lg:h-4 lg:w-4 text-green-600 flex-shrink-0" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{stats.completedToday}</div>
-                  <p className="text-xs text-muted-foreground">Successfully processed</p>
+                <CardContent className="px-3 lg:px-6">
+                  <div className="text-lg lg:text-2xl font-bold text-green-600">{stats.completedToday}</div>
+                  <p className="text-xs text-muted-foreground hidden sm:block">Completed</p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Value</CardTitle>
-                  <DollarSign className="h-4 w-4 text-purple-600" />
+              <Card className="min-w-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 lg:px-6">
+                  <CardTitle className="text-xs lg:text-sm font-medium truncate">Value</CardTitle>
+                  <DollarSign className="h-3 w-3 lg:h-4 lg:w-4 text-purple-600 flex-shrink-0" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-purple-600">₱{stats.totalValue.toLocaleString()}</div>
-                  <p className="text-xs text-muted-foreground">Active procurement value</p>
+                <CardContent className="px-3 lg:px-6">
+                  <div className="text-sm lg:text-2xl font-bold text-purple-600">₱{stats.totalValue.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground hidden sm:block">Active value</p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Mobile-Optimized Recent Activity */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
               <Card>
-                <CardHeader>
-                  <CardTitle>Recent Activities</CardTitle>
-                  <CardDescription>Latest procurement activities requiring attention</CardDescription>
+                <CardHeader className="px-4 lg:px-6">
+                  <CardTitle className="text-base lg:text-lg">Recent Activities</CardTitle>
+                  <CardDescription className="text-sm">Latest procurement activities</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 px-4 lg:px-6">
                   {processes.slice(0, 3).map((process) => (
-                    <div key={process.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-3">
+                    <div key={process.id} className="flex items-center justify-between p-3 lg:p-4 border rounded-lg">
+                      <div className="flex items-center space-x-3 min-w-0 flex-1">
                         <div className="flex-shrink-0">
                           {getTypeIcon(process.type)}
                         </div>
-                        <div>
-                          <p className="text-sm font-medium">{process.title}</p>
-                          <p className="text-xs text-gray-500">{process.description}</p>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <Badge className={getStatusColor(process.status)} variant="secondary">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium truncate">{process.title}</p>
+                          <p className="text-xs text-gray-500 truncate">{process.description}</p>
+                          <div className="flex items-center space-x-2 mt-1 flex-wrap">
+                            <Badge className={`${getStatusColor(process.status)} text-xs`} variant="secondary">
                               {process.status}
                             </Badge>
                             <div className={`w-2 h-2 rounded-full ${getPriorityColor(process.priority)}`} />
-                            <span className="text-xs text-gray-500">Due: {process.dueDate}</span>
+                            <span className="text-xs text-gray-500 hidden sm:inline">Due: {process.dueDate}</span>
                           </div>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm">View</Button>
+                      <Button variant="outline" size="sm" className="ml-2 flex-shrink-0">View</Button>
                     </div>
                   ))}
                 </CardContent>
               </Card>
 
+              {/* Process Flow - Simplified for Mobile */}
               <Card>
-                <CardHeader>
-                  <CardTitle>Procurement Process Flow</CardTitle>
-                  <CardDescription>Current workflow status overview</CardDescription>
+                <CardHeader className="px-4 lg:px-6">
+                  <CardTitle className="text-base lg:text-lg">Process Flow</CardTitle>
+                  <CardDescription className="text-sm">Workflow status</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
+                <CardContent className="px-4 lg:px-6">
+                  <div className="space-y-3 lg:space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <FileText className="h-4 w-4 text-blue-600" />
+                      <div className="flex items-center space-x-2 min-w-0 flex-1">
+                        <div className="w-6 h-6 lg:w-8 lg:h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+                          <FileText className="h-3 w-3 lg:h-4 lg:w-4 text-blue-600" />
                         </div>
-                        <span className="text-sm font-medium">MRF Creation & Approval</span>
+                        <span className="text-sm font-medium truncate">MRF Creation</span>
                       </div>
-                      <Badge variant="secondary">2 Pending</Badge>
+                      <Badge variant="secondary" className="text-xs flex-shrink-0">2 Pending</Badge>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                          <DollarSign className="h-4 w-4 text-yellow-600" />
+                      <div className="flex items-center space-x-2 min-w-0 flex-1">
+                        <div className="w-6 h-6 lg:w-8 lg:h-8 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center flex-shrink-0">
+                          <DollarSign className="h-3 w-3 lg:h-4 lg:w-4 text-yellow-600" />
                         </div>
-                        <span className="text-sm font-medium">Quotation Request</span>
+                        <span className="text-sm font-medium truncate">Quotations</span>
                       </div>
-                      <Badge variant="secondary">1 Active</Badge>
+                      <Badge variant="secondary" className="text-xs flex-shrink-0">1 Active</Badge>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                          <ShoppingCart className="h-4 w-4 text-green-600" />
+                      <div className="flex items-center space-x-2 min-w-0 flex-1">
+                        <div className="w-6 h-6 lg:w-8 lg:h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
+                          <ShoppingCart className="h-3 w-3 lg:h-4 lg:w-4 text-green-600" />
                         </div>
-                        <span className="text-sm font-medium">Purchase Orders</span>
+                        <span className="text-sm font-medium truncate">Purchase Orders</span>
                       </div>
-                      <Badge variant="secondary">3 Processing</Badge>
+                      <Badge variant="secondary" className="text-xs flex-shrink-0">3 Processing</Badge>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                          <Truck className="h-4 w-4 text-purple-600" />
+                      <div className="flex items-center space-x-2 min-w-0 flex-1">
+                        <div className="w-6 h-6 lg:w-8 lg:h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Truck className="h-3 w-3 lg:h-4 lg:w-4 text-purple-600" />
                         </div>
-                        <span className="text-sm font-medium">Delivery Coordination</span>
+                        <span className="text-sm font-medium truncate">Delivery</span>
                       </div>
-                      <Badge variant="secondary">2 Scheduled</Badge>
+                      <Badge variant="secondary" className="text-xs flex-shrink-0">2 Scheduled</Badge>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Quick Actions */}
+            {/* Mobile-Optimized Quick Actions */}
             <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>Start new procurement processes</CardDescription>
+              <CardHeader className="px-4 lg:px-6">
+                <CardTitle className="text-base lg:text-lg">Quick Actions</CardTitle>
+                <CardDescription className="text-sm">Start new processes</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-3">
-                  <Button onClick={() => setActiveTab("mrf")} className="flex items-center space-x-2">
-                    <Plus className="h-4 w-4" />
+              <CardContent className="px-4 lg:px-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap gap-2 lg:gap-3">
+                  <Button onClick={() => setActiveTab("mrf")} className="flex items-center justify-center space-x-1 lg:space-x-2 text-xs lg:text-sm">
+                    <Plus className="h-3 w-3 lg:h-4 lg:w-4" />
                     <span>New MRF</span>
                   </Button>
-                  <Button variant="outline" onClick={() => setActiveTab("quotations")}>
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    Request Quotation
+                  <Button variant="outline" onClick={() => setActiveTab("quotations")} className="flex items-center justify-center space-x-1 lg:space-x-2 text-xs lg:text-sm">
+                    <DollarSign className="h-3 w-3 lg:h-4 lg:w-4" />
+                    <span>Quote</span>
                   </Button>
-                  <Button variant="outline" onClick={() => setActiveTab("purchase-orders")}>
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Create Purchase Order
+                  <Button variant="outline" onClick={() => setActiveTab("purchase-orders")} className="flex items-center justify-center space-x-1 lg:space-x-2 text-xs lg:text-sm">
+                    <ShoppingCart className="h-3 w-3 lg:h-4 lg:w-4" />
+                    <span>PO</span>
                   </Button>
-                  <Button variant="outline" onClick={() => setActiveTab("suppliers")}>
-                    <Search className="h-4 w-4 mr-2" />
-                    Find Suppliers
+                  <Button variant="outline" onClick={() => setActiveTab("suppliers")} className="flex items-center justify-center space-x-1 lg:space-x-2 text-xs lg:text-sm">
+                    <Search className="h-3 w-3 lg:h-4 lg:w-4" />
+                    <span>Suppliers</span>
                   </Button>
-                  <Button variant="outline">
-                    <Mail className="h-4 w-4 mr-2" />
-                    Send Email to Supplier
+                  <Button variant="outline" className="flex items-center justify-center space-x-1 lg:space-x-2 text-xs lg:text-sm col-span-2 sm:col-span-1">
+                    <Mail className="h-3 w-3 lg:h-4 lg:w-4" />
+                    <span>Email</span>
                   </Button>
                 </div>
               </CardContent>
