@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Mail, Send, Copy, FileText } from "lucide-react";
+import { Mail, Send, Copy, FileText, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface EmailTemplate {
   id: string;
@@ -20,6 +20,7 @@ interface EmailTemplate {
 
 const EmailTemplates = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [editedSubject, setEditedSubject] = useState('');
   const [editedBody, setEditedBody] = useState('');
@@ -50,9 +51,10 @@ We would appreciate receiving your quotation by [DUE_DATE].
 Thank you for your time and consideration.
 
 Best regards,
-[YOUR_NAME]
-[YOUR_TITLE]
+${user?.fullName || '[YOUR_NAME]'}
+${user?.role || '[YOUR_TITLE]'}
 [COMPANY_NAME]
+Email: davecabrerarodriguez22@gmail.com
 [CONTACT_DETAILS]`
     },
     {
@@ -78,9 +80,10 @@ Could you please provide:
 We look forward to a mutually beneficial partnership.
 
 Best regards,
-[YOUR_NAME]
-[YOUR_TITLE]
-[COMPANY_NAME]`
+${user?.fullName || '[YOUR_NAME]'}
+${user?.role || '[YOUR_TITLE]'}
+[COMPANY_NAME]
+Contact: davecabrerarodriguez22@gmail.com`
     },
     {
       id: '3',
@@ -93,13 +96,13 @@ I hope you are doing well. I am following up on our quotation request sent on [D
 
 We would like to know the status of our request and when we can expect to receive your quotation.
 
-If you need any additional information or clarification, please don't hesitate to contact me.
+If you need any additional information or clarification, please don't hesitate to contact me at davecabrerarodriguez22@gmail.com.
 
 Thank you for your attention to this matter.
 
 Best regards,
-[YOUR_NAME]
-[YOUR_TITLE]
+${user?.fullName || '[YOUR_NAME]'}
+${user?.role || '[YOUR_TITLE]'}
 [COMPANY_NAME]`
     },
     {
@@ -122,11 +125,13 @@ Please confirm receipt of this purchase order and provide:
 - Delivery schedule
 - Invoice details
 
+For any questions, please contact us at davecabrerarodriguez22@gmail.com.
+
 We look forward to working with you.
 
 Best regards,
-[YOUR_NAME]
-[YOUR_TITLE]
+${user?.fullName || '[YOUR_NAME]'}
+${user?.role || '[YOUR_TITLE]'}
 [COMPANY_NAME]`
     }
   ];
@@ -147,13 +152,37 @@ Best regards,
       return;
     }
 
-    // Create mailto link
-    const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(editedSubject)}&body=${encodeURIComponent(editedBody)}`;
+    // Create mailto link with the configured email
+    const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(editedSubject)}&body=${encodeURIComponent(editedBody)}&from=davecabrerarodriguez22@gmail.com`;
     window.open(mailtoLink);
     
     toast({
       title: "Email Prepared",
       description: "Your default email client should open with the template"
+    });
+  };
+
+  const handleSendToAdmin = () => {
+    const adminEmailContent = `
+Subject: Email Template Used - ${selectedTemplate?.name}
+
+Template: ${selectedTemplate?.name}
+Recipient: ${recipientEmail}
+Subject: ${editedSubject}
+
+Body:
+${editedBody}
+
+---
+Sent from Procurement System by ${user?.fullName}
+    `;
+
+    const adminMailto = `mailto:davecabrerarodriguez22@gmail.com?subject=Email Template Usage Notification&body=${encodeURIComponent(adminEmailContent)}`;
+    window.open(adminMailto);
+    
+    toast({
+      title: "Admin Notification Sent",
+      description: "Admin has been notified of email template usage"
     });
   };
 
@@ -174,6 +203,9 @@ Best regards,
             <Mail className="h-5 w-5" />
             <span>Email Templates</span>
           </CardTitle>
+          <div className="text-sm text-muted-foreground">
+            Connected to: davecabrerarodriguez22@gmail.com
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -236,10 +268,14 @@ Best regards,
                         className="min-h-[300px] font-mono text-sm"
                       />
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button onClick={handleSendEmail} className="flex items-center space-x-2">
                         <Send className="h-4 w-4" />
-                        <span>Send Email</span>
+                        <span>Send to Supplier</span>
+                      </Button>
+                      <Button variant="outline" onClick={handleSendToAdmin} className="flex items-center space-x-2">
+                        <User className="h-4 w-4" />
+                        <span>Notify Admin</span>
                       </Button>
                       <Button variant="outline" onClick={handleCopyTemplate} className="flex items-center space-x-2">
                         <Copy className="h-4 w-4" />
@@ -250,6 +286,30 @@ Best regards,
                 </DialogContent>
               </Dialog>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick Email Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Email Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Button variant="outline" className="p-4 h-auto flex-col space-y-2">
+              <Mail className="h-6 w-6" />
+              <span className="font-medium">Compose New Email</span>
+              <span className="text-xs text-muted-foreground">Start from scratch</span>
+            </Button>
+            <Button variant="outline" className="p-4 h-auto flex-col space-y-2" onClick={() => {
+              const adminMailto = `mailto:davecabrerarodriguez22@gmail.com?subject=Procurement System - Quick Message`;
+              window.open(adminMailto);
+            }}>
+              <User className="h-6 w-6" />
+              <span className="font-medium">Email Admin</span>
+              <span className="text-xs text-muted-foreground">davecabrerarodriguez22@gmail.com</span>
+            </Button>
           </div>
         </CardContent>
       </Card>

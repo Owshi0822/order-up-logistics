@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, FileText, ShoppingCart, Truck, Mail, Calendar, DollarSign, User, AlertCircle, Search, Menu, Package, Building2, Eye, Github } from "lucide-react";
+import { Plus, FileText, ShoppingCart, Truck, Mail, Calendar, DollarSign, User, AlertCircle, Search, Menu, Package, Building2, Eye, Github, LogIn } from "lucide-react";
 import MRFForm from "@/components/MRFForm";
 import QuotationManager from "@/components/QuotationManager";
 import PurchaseOrderManager from "@/components/PurchaseOrderManager";
@@ -13,10 +13,12 @@ import EmailTemplates from "@/components/EmailTemplates";
 import InventoryManager from "@/components/InventoryManager";
 import EnterpriseIntegration from "@/components/EnterpriseIntegration";
 import GuestPortfolio from "@/components/GuestPortfolio";
+import AuthModal from "@/components/AuthModal";
+import UserAccountMenu from "@/components/UserAccountMenu";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface ProcessItem {
   id: string;
@@ -32,9 +34,11 @@ interface ProcessItem {
 
 const Index = () => {
   const { toast } = useToast();
+  const { user, isAuthenticated, signIn, signOut, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isGuestMode, setIsGuestMode] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [processes] = useState<ProcessItem[]>([
     {
       id: "MRF-001",
@@ -69,6 +73,115 @@ const Index = () => {
       assignee: "Procurement Team"
     }
   ]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 dark:border-white"></div>
+          <p className="mt-4 text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show authentication required state
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-4 lg:py-6">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white truncate">
+                  Procurement System
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mt-1">
+                  Internal logistics and purchasing platform
+                </p>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <ThemeToggle />
+                <Button variant="outline" size="sm" onClick={() => setIsGuestMode(true)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Portfolio View
+                </Button>
+                <Button onClick={() => setIsAuthModalOpen(true)}>
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {isGuestMode ? (
+          <div className="relative">
+            <div className="absolute top-4 right-4 z-50">
+              <Button 
+                onClick={() => setIsGuestMode(false)}
+                variant="outline"
+                className="bg-white/90 backdrop-blur-sm"
+              >
+                Back to App
+              </Button>
+            </div>
+            <GuestPortfolio />
+          </div>
+        ) : (
+          <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tight">Welcome to Procurement System</h2>
+                <p className="text-lg text-gray-600 dark:text-gray-300">
+                  Please sign in to access the procurement management platform
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <FileText className="h-12 w-12 mx-auto mb-4 text-blue-600" />
+                    <h3 className="font-semibold mb-2">Material Request Forms</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Create and manage purchase requests</p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-green-600" />
+                    <h3 className="font-semibold mb-2">Purchase Orders</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Track orders and deliveries</p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <Package className="h-12 w-12 mx-auto mb-4 text-purple-600" />
+                    <h3 className="font-semibold mb-2">Inventory Management</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Monitor stock levels and availability</p>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <Button size="lg" onClick={() => setIsAuthModalOpen(true)} className="mt-8">
+                <LogIn className="h-5 w-5 mr-2" />
+                Get Started - Sign In
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <AuthModal 
+          isOpen={isAuthModalOpen} 
+          onClose={() => setIsAuthModalOpen(false)}
+          onAuthSuccess={signIn}
+        />
+      </div>
+    );
+  }
 
   // If in guest mode, show portfolio
   if (isGuestMode) {
@@ -165,14 +278,11 @@ const Index = () => {
                 <Github className="h-4 w-4 mr-2" />
                 GitHub
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setActiveTab("email")}>
                 <Mail className="h-4 w-4 mr-2" />
                 Email Center
               </Button>
-              <Badge variant="secondary" className="px-3 py-1">
-                <User className="h-3 w-3 mr-1" />
-                Procurement Officer
-              </Badge>
+              <UserAccountMenu user={user!} onSignOut={signOut} />
             </div>
 
             {/* Mobile Actions */}
@@ -194,14 +304,13 @@ const Index = () => {
                       <Github className="h-4 w-4 mr-2" />
                       GitHub Repository
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setActiveTab("email")}>
                       <Mail className="h-4 w-4 mr-2" />
                       Email Center
                     </Button>
-                    <Badge variant="secondary" className="w-full justify-center px-3 py-2">
-                      <User className="h-3 w-3 mr-1" />
-                      Procurement Officer
-                    </Badge>
+                    <div className="pt-4">
+                      <UserAccountMenu user={user!} onSignOut={signOut} />
+                    </div>
                   </div>
                 </SheetContent>
               </Sheet>
